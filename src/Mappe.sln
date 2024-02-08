@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mappe", "Mappe\Mappe.csproj", "{47CD2B20-1E70-49B4-95BB-EA34E33D2C0B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mappe", "Mappe\Mappe.csproj", "{47CD2B20-1E70-49B4-95BB-EA34E33D2C0B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{44859D22-3E90-4A03-B959-E53D92B1EF17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp", "TestApp\TestApp.csproj", "{44859D22-3E90-4A03-B959-E53D92B1EF17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "Benchmark\Benchmark.csproj", "{CD54E3CF-C044-4807-BB25-9D326C6AFBAE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmark", "Benchmark\Benchmark.csproj", "{CD54E3CF-C044-4807-BB25-9D326C6AFBAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

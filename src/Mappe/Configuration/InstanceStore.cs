@@ -1,29 +1,53 @@
-﻿using Mappe.Configuration.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Mappe.Configuration
 {
     public static class InstanceStore
     {
-        private static readonly Dictionary<TypePair, object> Instances = new Dictionary<TypePair, object>();
+        private static readonly TypeList Instances = new();
 
-        public static void Store(Type src, Type dst, object instance)
+        public static void Store(Type src, Type dst, object instance, string methodName)
         {
-            Instances.Add(new TypePair(src, dst), instance);
+            var functionPointer = instance.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.Static)?.MethodHandle.GetFunctionPointer();
+            TypeList.Add(new TypePair(src, dst), new ClassInstance(instance, functionPointer));
         }
 
-        public static IMapper<T1, T2> GetInstance<T1, T2>(Type src, Type dest)
+        public static unsafe T2 Execute<T2>(Type src, Type dest, object instance)
         {
-            return (IMapper<T1, T2>)Instances[new TypePair(src, dest)];
+            return (T2)((delegate*<object, object>)Instances[src, dest].FunctionPointer)(instance);
+        }
+    }
+
+    internal class TypeList
+    {
+        private static readonly List<TypePair> _types = new();
+
+        private static readonly List<ClassInstance> _instances = new();
+
+        public static void Add(TypePair typePair, ClassInstance instance)
+        {
+            _types.Add(typePair);
+            _instances.Add(instance);
+        }
+
+        private static readonly TypePair _typePair = new();
+
+        public ClassInstance this[Type a, Type b] {
+            get
+            {
+                _typePair.Set(a, b);
+                return _instances[_types.IndexOf(_typePair)];
+            }
         }
     }
 
     internal class TypePair : IEquatable<TypePair>
     {
-        private readonly Type _sourceType;
+        private Type _sourceType;
 
-        private readonly Type _destinationType;
+        private Type _destinationType;
 
         public TypePair(Type sourceType, Type destinationType)
         {
@@ -31,6 +55,15 @@ namespace Mappe.Configuration
             _destinationType = destinationType;
         }
 
+        public TypePair()
+        {
+        }
+
+        public void Set(Type sourceType, Type destinationType)
+        {
+            _sourceType = sourceType;
+            _destinationType = destinationType;
+        }
 
         public bool Equals(TypePair other)
         {
@@ -43,16 +76,22 @@ namespace Mappe.Configuration
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((TypePair) obj);
+            return obj.GetType() == GetType() && Equals((TypePair) obj);
         }
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return ((_sourceType != null ? _sourceType.GetHashCode() : 0) * 397) ^ (_destinationType != null ? _destinationType.GetHashCode() : 0);
-            }
-        }
+        public override int GetHashCode() => unchecked (_sourceType.GetHashCode() * 397) ^ _destinationType.GetHashCode();
     }
+
+    internal class ClassInstance
+    {
+        public object Instance { get; set; }
+
+        public IntPtr? FunctionPointer;
+
+        public ClassInstance(object instance, IntPtr? functionPointer)
+        {
+            Instance = instance;
+            FunctionPointer = functionPointer;
+        }
+    };
 }

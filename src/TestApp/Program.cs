@@ -1,45 +1,12 @@
 ﻿using Mappe;
 using Microsoft.Extensions.DependencyInjection;
+using Nelibur.ObjectMapper;
 using Newtonsoft.Json;
+using TestApp.Models.DataTransferObjects;
+using TestApp.Models.Entities;
 
 namespace TestApp
 {
-
-    public sealed class Source
-    {
-        public bool Bool { get; set; }
-        public byte Byte { get; set; }
-        public char Char { get; set; }
-        public DateTime DateTime { get; set; }
-        public decimal Decimal { get; set; }
-        public string Email { get; set; }
-        public string FirstName { get; set; }
-        public float Float { get; set; }
-        public int Int { get; set; }
-        public string LastName { get; set; }
-        public long Long { get; set; }
-        public string Nickname { get; set; }
-        public short Short { get; set; }
-    }
-
-
-    public sealed class Destination
-    {
-        public bool Bool { get; set; }
-        public byte Byte { get; set; }
-        public char Char { get; set; }
-        public DateTime DateTime { get; set; }
-        public decimal Decimal { get; set; }
-        public string Email { get; set; }
-        public string FirstName { get; set; }
-        public float Float { get; set; }
-        public int Int { get; set; }
-        public string LastName { get; set; }
-        public long Long { get; set; }
-        public string Nickname { get; set; }
-        public short Short { get; set; }
-    }
-
     internal class Program
     {
         private static void Main()
@@ -47,38 +14,112 @@ namespace TestApp
             var servicesCollection = new ServiceCollection();
             servicesCollection.AddMappe();
 
-            Mapper.Bind<Source, Destination>()
+            TinyMapper.Bind<TestObject, TestObjectDto>();
+            TinyMapper.Bind<TestObjectModification, TestObjectModificationDto>();
+            TinyMapper.Bind<TestObjectField, TestObjectFieldDto>();
+            TinyMapper.Bind<TestObjectLink, TestObjectLinkDto>();
+
+            Mapper.Bind<TestObject, TestObjectDto>()
+                .Bind<TestObjectModification, TestObjectModificationDto>()
+                .Bind<TestObjectField, TestObjectFieldDto>()
+                .Bind<TestObjectLink, TestObjectLinkDto>()
                 .Compile();
 
-            GC.Collect();
+            AutoMapper.Mapper.Initialize(cfg =>
+            {
+                cfg.CreateMap<TestObjectModification, TestObjectModificationDto>();
+                cfg.CreateMap<TestObjectField, TestObjectFieldDto>();
+                cfg.CreateMap<TestObjectLink, TestObjectLinkDto>();
+                cfg.CreateMap<TestObject, TestObjectDto>();
+            });
 
             var serviceProvider = servicesCollection.BuildServiceProvider();
             var scope = serviceProvider.CreateScope();
 
             var mappe = scope.ServiceProvider.GetRequiredService<IMapper>();
 
-            var source = new Source
+            var n = 2_500;
+            var source = new TestObject
             {
-                FirstName = "John",
-                LastName = "Doe",
-                Nickname = "TinyMapper",
-                Email = "support@TinyMapper.net",
-                Short = 3,
-                Long = 10,
-                Int = 5,
-                Float = 4.9f,
-                Decimal = 4.0m,
-                DateTime = DateTime.Now,
+                Id = n,
+                FirstName = "Jan",
+                LastName = "Kowalski",
+                Nickname = "jankowalski",
+                Email = "example@example.com",
+                Short = short.MaxValue,
+                Long = long.MaxValue,
+                Int = int.MaxValue,
+                Float = float.MaxValue,
+                Decimal = decimal.MaxValue,
+                DateTime = DateTime.MaxValue,
                 Char = 'a',
                 Bool = true,
-                Byte = 0
+                Byte = byte.MaxValue
             };
 
-            var destination = mappe.Map<Source, Destination>(source);
+            for (var i = 0; i < n; i++)
+            {
+                source.Modifications.Add(new TestObjectModification
+                {
+                    Id = i,
+                    Type = $"Type {i}",
+                    Date = DateTime.Now,
+                    Author = $"Author {i}"
+                });
 
-            Console.WriteLine($"Source = {JsonConvert.SerializeObject(source, Formatting.Indented)}");
+                source.Fields.Add(new TestObjectField
+                {
+                    Id = i,
+                    Name = $"Name {i}",
+                });
+
+                source.Links.Add(new TestObjectLink
+                {
+                    Id = i,
+                    Url = $"Url {i}"
+                });
+            }
+
+            var child = source;
+            for (var j = 0; j < n; j++)
+            {
+                child.Child = CreateSource(j);
+                child = child.Child;
+            }
+
+            var sw = new System.Diagnostics.Stopwatch();
+            //var destination = mappe.Map<TestObject, TestObjectDto>(source);
+            var destination = AutoMapper.Mapper.Map<TestObject, TestObjectDto>(source);
+            //var destination = TinyMapper.Map<TestObjectDto>(source);
+            sw.Stop();
+
+            //Console.WriteLine($"Source = {JsonConvert.SerializeObject(source, Formatting.Indented)}");
+            //Console.WriteLine();
+            //Console.WriteLine($"Destination = {JsonConvert.SerializeObject(destination, Formatting.Indented)}");
+
             Console.WriteLine();
-            Console.WriteLine($"Destination = {JsonConvert.SerializeObject(destination, Formatting.Indented)}");
+            Console.WriteLine($"Elapsed = {sw.ElapsedMilliseconds}");
+        }
+
+        private static TestObject CreateSource(int n)
+        {
+            return new TestObject
+            {
+                Id = n,
+                FirstName = "Jan",
+                LastName = "Kowalski",
+                Nickname = $"jankowalski{n}",
+                Email = "example@example.com",
+                Short = short.MaxValue,
+                Long = long.MaxValue,
+                Int = int.MaxValue,
+                Float = float.MaxValue,
+                Decimal = decimal.MaxValue,
+                DateTime = DateTime.MaxValue,
+                Char = 'a',
+                Bool = true,
+                Byte = byte.MaxValue
+            };
         }
     }
 }
