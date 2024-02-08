@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Mappe\Mappe.csproj" />
+    <ProjectReference Include="..\Mappee\Mappee.csproj" />
   </ItemGroup>
 
 </Project>

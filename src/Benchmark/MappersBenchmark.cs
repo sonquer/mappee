@@ -17,7 +17,7 @@ namespace Benchmark
     {
         private TestObject _source;
 
-        [Params(1, 5, 10, 20, 50, 500)]
+        [Params(1,5,20)]
         public int Items;
 
         [GlobalSetup]
@@ -92,25 +92,25 @@ namespace Benchmark
         }
 
         [Benchmark]
-        public void AutoMapperBench()
+        public void AutoMapper_Bench()
         {
             var _ = AutoMapper.Mapper.Map<TestObjectDto>(_source);
         }
 
         [Benchmark]
-        public void TinyMapperBench()
+        public void TinyMapper_Bench()
         {
             var _ = TinyMapper.Map<TestObject, TestObjectDto>(_source);
         }
 
         [Benchmark]
-        public void MappeBench()
+        public void Mappee_Bench()
         {
             var _ = Mapper.Map<TestObject, TestObjectDto>(_source);
         }
 
         [Benchmark]
-        public void HandwrittenBench()
+        public void Handwritten_Bench()
         {
             var _ = CustomMapping(_source);
         }
