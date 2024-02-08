@@ -3,11 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mappe", "Mappe\Mappe.csproj", "{47CD2B20-1E70-49B4-95BB-EA34E33D2C0B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp", "TestApp\TestApp.csproj", "{44859D22-3E90-4A03-B959-E53D92B1EF17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{44859D22-3E90-4A03-B959-E53D92B1EF17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmark", "Benchmark\Benchmark.csproj", "{CD54E3CF-C044-4807-BB25-9D326C6AFBAE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "Benchmark\Benchmark.csproj", "{CD54E3CF-C044-4807-BB25-9D326C6AFBAE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mappee", "Mappee\Mappee.csproj", "{DA334ACF-22A0-4DB3-8714-26D5CD31303E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F15FFFB2-417C-43CB-A83C-4A0038BE0DC0}"
+	ProjectSection(SolutionItems) = preProject
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +20,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{47CD2B20-1E70-49B4-95BB-EA34E33D2C0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{47CD2B20-1E70-49B4-95BB-EA34E33D2C0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{47CD2B20-1E70-49B4-95BB-EA34E33D2C0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{47CD2B20-1E70-49B4-95BB-EA34E33D2C0B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{44859D22-3E90-4A03-B959-E53D92B1EF17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{44859D22-3E90-4A03-B959-E53D92B1EF17}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44859D22-3E90-4A03-B959-E53D92B1EF17}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -27,6 +28,10 @@ Global
 		{CD54E3CF-C044-4807-BB25-9D326C6AFBAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD54E3CF-C044-4807-BB25-9D326C6AFBAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD54E3CF-C044-4807-BB25-9D326C6AFBAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA334ACF-22A0-4DB3-8714-26D5CD31303E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA334ACF-22A0-4DB3-8714-26D5CD31303E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA334ACF-22A0-4DB3-8714-26D5CD31303E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA334ACF-22A0-4DB3-8714-26D5CD31303E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

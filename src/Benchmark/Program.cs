@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Running;
+using System;
 
 namespace Benchmark
 {
@@ -6,7 +7,7 @@ namespace Benchmark
     {
         public static void Main()
         {
-            BenchmarkRunner.Run<PrimitiveTypeBenchmark>();
+            BenchmarkRunner.Run<MappersBenchmark>();
             //BenchmarkRunner.Run<CollectionBenchmark>();
 
             Console.ReadKey();

@@ -10,10 +10,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="AutoMapper" Version="6.1.1" />
+    <PackageReference Include="TinyMapper" Version="3.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Mappe\Mappe.csproj" />
+    <ProjectReference Include="..\Mappee\Mappee.csproj" />
   </ItemGroup>
 
 </Project>

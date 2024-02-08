@@ -2,18 +2,20 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <TargetFrameworks>net8;net7;net6</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+	  <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="6.1.1" />
     <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
     <PackageReference Include="TinyMapper" Version="3.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Mappe\Mappe.csproj" />
+    <ProjectReference Include="..\Mappee\Mappee.csproj" />
   </ItemGroup>
 
 </Project>
