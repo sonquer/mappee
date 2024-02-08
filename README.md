@@ -14,11 +14,11 @@ Generated code is cached, so it is only generated once for each type pair, and t
 ## Mappee vs other mappers (performance comparison)
 #### 2500 items in 3 different collections and 2500 nested objects (like linked list)
 
-![Performance Comparison 2500](https://raw.githubusercontent.com/sonquer/mappee/main/img/benchmarks/2500-barplot.png)
+![Performance Comparison 2500](/assets/images/2500-barplot.png)
 
 #### 1,5,20 items in 3 different collections and 1,5,20 nested objects (like linked list)
 
-![Performance Comparison 1,5,20](https://raw.githubusercontent.com/sonquer/mappee/main/img/benchmarks/5-10-20-barplot.png)
+![Performance Comparison 1,5,20](/assets/images/5-10-20-barplot.png)
 
 ## Supported platforms
 - .NET 8.0
