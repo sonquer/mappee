@@ -2,6 +2,7 @@
 using Benchmark.Models.Entities;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
+using Mappee;
 using Nelibur.ObjectMapper;
 using System;
 
