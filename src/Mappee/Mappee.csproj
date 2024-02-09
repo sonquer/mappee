@@ -4,11 +4,37 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1;net7;net8;net481</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	  <LangVersion>latest</LangVersion>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <Description>Mappee - Fastest avaiable mapper for .NET (AutoMapper / TinyMapper / Mapster / Mapperly alternative)</Description>
+	  <Copyright>https://github.com/sonquer/mappee/blob/main/LICENSE</Copyright>
+	  <PackageProjectUrl>https://github.com/sonquer/mappee</PackageProjectUrl>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <RepositoryUrl>https://github.com/sonquer/mappee</RepositoryUrl>
+	  <RepositoryType>git</RepositoryType>
+	  <Authors>Patryk Pasek</Authors>
+	  <AssemblyVersion>0.1.0.0</AssemblyVersion>
+	  <FileVersion>0.1.0.0</FileVersion>
+	  <Version>0.1.0.0-alpha</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="Mappee.UnitTests" />
+	</ItemGroup>
 
 </Project>

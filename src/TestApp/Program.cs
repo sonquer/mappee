@@ -1,7 +1,8 @@
-﻿using Mappe;
+﻿using Mappee;
+using Mappee.Abstraction;
+using Mappee.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Nelibur.ObjectMapper;
-using Newtonsoft.Json;
 using TestApp.Models.DataTransferObjects;
 using TestApp.Models.Entities;
 
@@ -11,19 +12,16 @@ namespace TestApp
     {
         private static void Main()
         {
-            var servicesCollection = new ServiceCollection();
-            servicesCollection.AddMappe();
-
             TinyMapper.Bind<TestObject, TestObjectDto>();
             TinyMapper.Bind<TestObjectModification, TestObjectModificationDto>();
             TinyMapper.Bind<TestObjectField, TestObjectFieldDto>();
             TinyMapper.Bind<TestObjectLink, TestObjectLinkDto>();
 
-            Mapper.Bind<TestObject, TestObjectDto>()
-                .Bind<TestObjectModification, TestObjectModificationDto>()
-                .Bind<TestObjectField, TestObjectFieldDto>()
-                .Bind<TestObjectLink, TestObjectLinkDto>()
-                .Compile();
+            //Mapper.Bind<TestObject, TestObjectDto>()
+            //    .Bind<TestObjectModification, TestObjectModificationDto>()
+            //    .Bind<TestObjectField, TestObjectFieldDto>()
+            //    .Bind<TestObjectLink, TestObjectLinkDto>()
+            //    .Compile();
 
             AutoMapper.Mapper.Initialize(cfg =>
             {
@@ -33,10 +31,21 @@ namespace TestApp
                 cfg.CreateMap<TestObject, TestObjectDto>();
             });
 
+            var servicesCollection = new ServiceCollection();
+            servicesCollection.AddMappee(profile =>
+            {
+                profile.Bind<TestObject, TestObjectDto>();
+                profile.Bind<TestObjectModification, TestObjectModificationDto>();
+                profile.Bind<TestObjectField, TestObjectFieldDto>();
+                profile.Bind<TestObjectLink, TestObjectLinkDto>();
+            });
+
+            //[...]
+
             var serviceProvider = servicesCollection.BuildServiceProvider();
             var scope = serviceProvider.CreateScope();
 
-            var mappe = scope.ServiceProvider.GetRequiredService<IMapper>();
+            var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
 
             var n = 2_500;
             var source = new TestObject
@@ -89,8 +98,9 @@ namespace TestApp
 
             var sw = new System.Diagnostics.Stopwatch();
             //var destination = mappe.Map<TestObject, TestObjectDto>(source);
-            var destination = AutoMapper.Mapper.Map<TestObject, TestObjectDto>(source);
+            //var destination = AutoMapper.Mapper.Map<TestObject, TestObjectDto>(source);
             //var destination = TinyMapper.Map<TestObjectDto>(source);
+            var destination = mapper.Map<TestObject, TestObjectDto>(source);
             sw.Stop();
 
             //Console.WriteLine($"Source = {JsonConvert.SerializeObject(source, Formatting.Indented)}");

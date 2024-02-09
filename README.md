@@ -12,13 +12,51 @@ Generated code is cached, so it is only generated once for each type pair, and t
 - Simple and easy to use
 
 ## Mappee vs other mappers (performance comparison)
+
+### Benchmarks
+
 #### 2500 items in 3 different collections and 2500 nested objects (like linked list)
 
 ![Performance Comparison 2500](/assets/images/2500-barplot.png)
 
-#### 1,5,20 items in 3 different collections and 1,5,20 nested objects (like linked list)
+##### 1,5,20 items in 3 different collections and 1,5,20 nested objects (like linked list)
 
 ![Performance Comparison 1,5,20](/assets/images/5-10-20-barplot.png)
+
+## Getting Started
+
+### Using static methods
+```csharp
+Mapper.Bind<TestObject, TestObjectDto>()
+    .Bind<TestObjectModification, TestObjectModificationDto>()
+    .Bind<TestObjectField, TestObjectFieldDto>()
+    .Bind<TestObjectLink, TestObjectLinkDto>()
+    .Compile();
+
+var testObject = new TestObject();
+
+var testObjectDto = Mapper.Map<TestObjectDto>(testObject);
+```
+
+### Using dependency injection
+```csharp
+var servicesCollection = new ServiceCollection();
+servicesCollection.AddMappee(profile =>
+{
+    profile.Map<TestObject, TestObjectDto>();
+    //invoke compile method is not necessary, it will be called automatically
+});
+
+//[...]
+
+var serviceProvider = servicesCollection.BuildServiceProvider();
+var scope = serviceProvider.CreateScope();
+
+var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+
+var testObject = new TestObject();
+var testObjectDto = mapper.Map<TestObject, TestObjectDto>(testObject);
+```
 
 ## Supported platforms
 - .NET 8.0

@@ -1,10 +1,11 @@
-﻿namespace Mappe
+﻿using Mappee.Abstraction;
+
+namespace Mappee;
+
+public class MappeExecutor : IMapper
 {
-    public class MappeExecutor : IMapper
+    public T2 Map<T1, T2>(T1 source)
     {
-        public T2 Map<T1, T2>(T1 source)
-        {
-            return Mapper.Map<T1, T2>(source);
-        }
+        return Mapper.Map<T1, T2>(source);
     }
 }
