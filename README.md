@@ -2,6 +2,7 @@ Mappee - Fastest avaiable mapper for .NET
 ======================================================
 [![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/sonquer/mappee/blob/main/LICENSE)
 [![First Timers](https://img.shields.io/badge/first--timers--only-friendly-blue.svg)](http://www.firsttimersonly.com/)
+[![Nuget](https://img.shields.io/nuget/v/mappee.svg)](https://www.nuget.org/packages/Mappee/)
 
 Mappee is a high performance object-to-object mapper for .NET. It is a simple and easy to use library that can be used to map objects of different types. It is designed to be fast and efficient, and it is the fastest available mapper for .NET.
 The main idea is to map objects using precompiled code, which makes it much faster than other mappers that use reflection.
