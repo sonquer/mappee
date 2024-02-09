@@ -3,8 +3,9 @@ using Benchmark.Models.Entities;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using Mappee;
-using Nelibur.ObjectMapper;
 using System;
+using AutoMapperForBenchmark = AutoMapper;
+using TinyMapperForBenchmark = Nelibur.ObjectMapper;
 
 namespace Benchmark
 {
@@ -17,7 +18,7 @@ namespace Benchmark
     {
         private TestObject _source;
 
-        [Params(1,5,20)]
+        [Params(2500)]
         public int Items;
 
         [GlobalSetup]
@@ -71,10 +72,10 @@ namespace Benchmark
                 child = child.Child;
             }
 
-            TinyMapper.Bind<TestObject, TestObjectDto>();
-            TinyMapper.Bind<TestObjectModification, TestObjectModificationDto>();
-            TinyMapper.Bind<TestObjectField, TestObjectFieldDto>();
-            TinyMapper.Bind<TestObjectLink, TestObjectLinkDto>();
+            TinyMapperForBenchmark.TinyMapper.Bind<TestObject, TestObjectDto>();
+            TinyMapperForBenchmark.TinyMapper.Bind<TestObjectModification, TestObjectModificationDto>();
+            TinyMapperForBenchmark.TinyMapper.Bind<TestObjectField, TestObjectFieldDto>();
+            TinyMapperForBenchmark.TinyMapper.Bind<TestObjectLink, TestObjectLinkDto>();
 
             Mapper.Bind<TestObject, TestObjectDto>()
                 .Bind<TestObjectModification, TestObjectModificationDto>()
@@ -82,7 +83,7 @@ namespace Benchmark
                 .Bind<TestObjectLink, TestObjectLinkDto>()
                 .Compile();
 
-            AutoMapper.Mapper.Initialize(cfg =>
+            AutoMapperForBenchmark.Mapper.Initialize(cfg =>
             {
                 cfg.CreateMap<TestObjectModification, TestObjectModificationDto>();
                 cfg.CreateMap<TestObjectField, TestObjectFieldDto>();
@@ -92,25 +93,25 @@ namespace Benchmark
         }
 
         [Benchmark]
-        public void AutoMapper_Bench()
+        public void AutoMapper()
         {
-            var _ = AutoMapper.Mapper.Map<TestObjectDto>(_source);
+            var _ = AutoMapperForBenchmark.Mapper.Map<TestObjectDto>(_source);
         }
 
         [Benchmark]
-        public void TinyMapper_Bench()
+        public void TinyMapper()
         {
-            var _ = TinyMapper.Map<TestObject, TestObjectDto>(_source);
+            var _ = TinyMapperForBenchmark.TinyMapper.Map<TestObject, TestObjectDto>(_source);
         }
 
         [Benchmark]
-        public void Mappee_Bench()
+        public void Mappee()
         {
             var _ = Mapper.Map<TestObject, TestObjectDto>(_source);
         }
 
         [Benchmark]
-        public void Handwritten_Bench()
+        public void Handwritten()
         {
             var _ = CustomMapping(_source);
         }
