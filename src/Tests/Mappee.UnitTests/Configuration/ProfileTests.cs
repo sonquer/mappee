@@ -10,7 +10,7 @@ namespace Mappee.UnitTests.Configuration
         {
             var profile = new Profile();
             profile.Map<TestObject, TestObjectDto>();
-            profile.Map<TestObject, TestObjectDto>();
+            profile.Map<TestObjectField, TestObjectFieldDto>();
 
             var result = profile.Compile(compilationResult: true);
 
@@ -25,6 +25,7 @@ namespace Mappee.UnitTests.Configuration
         {
             var profile = new Profile();
             profile.Map<TestObject, TestObjectDto>();
+            profile.Map<TestObjectField, TestObjectFieldDto>();
 
             var sourceCode = profile.Compile(compilationResult: true);
 
@@ -44,6 +45,8 @@ namespace Mappee.UnitTests.Configuration
             Assert.Contains("classInstance.Long = source.Long;", sourceCode.GeneratedCode);
             Assert.Contains("classInstance.Nickname = source.Nickname;", sourceCode.GeneratedCode);
             Assert.Contains("classInstance.Short = source.Short;", sourceCode.GeneratedCode);
+            Assert.Contains("classInstance.Fields = new List<Mappee.UnitTests.Models.TestObjectFieldDto>();", sourceCode.GeneratedCode);
+            Assert.Contains("((List<Mappee.UnitTests.Models.TestObjectField>)source.Fields)?.ForEach(x => classInstance.Fields.Add(__Mappe_Quick_Mapping.__Mappee_UnitTests_Models_TestObjectField_to_Mappee_UnitTests_Models_TestObjectFieldDto(x)));", sourceCode.GeneratedCode);
             Assert.Contains("return classInstance;", sourceCode.GeneratedCode);
         }
 
@@ -52,6 +55,7 @@ namespace Mappee.UnitTests.Configuration
         {
             var profile = new Profile();
             profile.Map<TestObject, TestObjectDto>();
+            profile.Map<TestObjectField, TestObjectFieldDto>();
 
             var result = profile.Compile(compilationResult: false);
 
@@ -63,6 +67,7 @@ namespace Mappee.UnitTests.Configuration
         {
             var profile = new Profile();
             profile.Map<TestObject, TestObjectDto>();
+            profile.Map<TestObjectField, TestObjectFieldDto>();
 
             var result = profile.Compile(compilationResult: true, aggressiveOptimization: false);
 
@@ -74,6 +79,7 @@ namespace Mappee.UnitTests.Configuration
         {
             var profile = new Profile();
             profile.Map<TestObject, TestObjectDto>();
+            profile.Map<TestObjectField, TestObjectFieldDto>();
 
             var result = profile.Compile(compilationResult: true, aggressiveOptimization: true);
 

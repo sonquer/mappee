@@ -49,13 +49,13 @@ public class Profile : IProfile
             if (destinationProperty != null)
             {
                 string mapping;
-                if (sourceProperty.PropertyType.IsClass && sourceProperty.PropertyType != typeof(string))
+                if ((sourceProperty.PropertyType.IsClass || sourceProperty.PropertyType.IsAbstract || sourceProperty.PropertyType.IsInterface) && sourceProperty.PropertyType != typeof(string))
                 {
-                    if (sourceProperty.PropertyType.GetInterface(nameof(IEnumerable)) != null)
+                    if (sourceProperty.PropertyType.GetInterface(nameof(IEnumerable)) != null || sourceProperty.PropertyType.GetInterface(nameof(ICollection)) != null)
                     {
                         var genericSourceType = sourceProperty.PropertyType.GetGenericArguments()[0];
                         var genericDestinationType = destinationProperty.PropertyType.GetGenericArguments()[0];
-                        mapping = $"classInstance.{destinationProperty.Name} = new();\r\nsource.{sourceProperty.Name}?.ForEach(x => classInstance.{destinationProperty.Name}.Add(__Mappe_Quick_Mapping.{GenerateMethodName(genericSourceType, genericDestinationType)}(x)));";
+                        mapping = $"classInstance.{destinationProperty.Name} = new List<{genericDestinationType.Namespace}.{genericDestinationType.Name}>();\r\n((List<{genericSourceType.Namespace}.{genericSourceType.Name}>)source.{sourceProperty.Name})?.ForEach(x => classInstance.{destinationProperty.Name}.Add(__Mappe_Quick_Mapping.{GenerateMethodName(genericSourceType, genericDestinationType)}(x)));";
                     }
                     else
                     {
