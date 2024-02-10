@@ -20,7 +20,7 @@ public sealed class TestObject
     public string Nickname { get; set; }
     public short Short { get; set; }
     public List<TestObjectField> Fields { get; set; } = new();
-    public List<TestObjectModification> Modifications { get; set; } = new();
-    public List<TestObjectLink> Links { get; set; } = new();
+    public IEnumerable<TestObjectModification> Modifications { get; set; } = new List<TestObjectModification>();
+    public ICollection<TestObjectLink> Links { get; set; } = new List<TestObjectLink>();
     public TestObject Child { get; set; }
 }

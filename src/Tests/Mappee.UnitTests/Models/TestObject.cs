@@ -16,4 +16,5 @@ public sealed class TestObject
     public long Long { get; set; }
     public string Nickname { get; set; }
     public short Short { get; set; }
+    public ICollection<TestObjectField> Fields { get; set; } = new List<TestObjectField>();
 }

@@ -16,4 +16,5 @@ public sealed class TestObjectDto
     public long Long { get; set; }
     public string Nickname { get; set; }
     public short Short { get; set; }
+    public List<TestObjectFieldDto> Fields { get; set; } = new();
 }
