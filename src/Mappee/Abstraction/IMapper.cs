@@ -2,5 +2,7 @@
 
 public interface IMapper
 {
-    T2 Map<T1, T2>(T1 source);
+    TDestination Map<TSource, TDestination>(TSource source);
+
+    TDestination Map<TDestination>(object source);
 }

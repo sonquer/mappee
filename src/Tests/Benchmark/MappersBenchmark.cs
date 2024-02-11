@@ -4,6 +4,7 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using Mappee;
 using System;
+using System.Collections.Generic;
 using AutoMapperForBenchmark = AutoMapper;
 using TinyMapperForBenchmark = Nelibur.ObjectMapper;
 
@@ -44,7 +45,7 @@ namespace Benchmark
 
             for (var i = 0; i < Items; i++)
             {
-                _source.Modifications.Add(new TestObjectModification
+                ((List<TestObjectModification>)_source.Modifications).Add(new TestObjectModification
                 {
                     Id = i,
                     Type = $"Type {i}",
@@ -120,8 +121,8 @@ namespace Benchmark
         {
             var item = new TestObjectDto();
             item.Child = source.Child != null ? CustomMapping(source.Child) : null;
-            source.Links?.ForEach(x => item.Links.Add(new TestObjectLinkDto { Id = x.Id, Url = x.Url }));
-            source.Modifications?.ForEach(x => item.Modifications.Add(new TestObjectModificationDto { Id = x.Id, Type = x.Type, Date = x.Date, Author = x.Author }));
+            ((List<TestObjectLink>)source.Links)?.ForEach(x => item.Links.Add(new TestObjectLinkDto { Id = x.Id, Url = x.Url }));
+            ((List<TestObjectModification>)source.Modifications)?.ForEach(x => item.Modifications.Add(new TestObjectModificationDto { Id = x.Id, Type = x.Type, Date = x.Date, Author = x.Author }));
             source.Fields?.ForEach(x => item.Fields.Add(new TestObjectFieldDto { Id = x.Id, Name = x.Name }));
             item.Short = source.Short;
             item.Nickname = source.Nickname;

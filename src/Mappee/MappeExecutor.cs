@@ -8,4 +8,9 @@ public class MappeExecutor : IMapper
     {
         return Mapper.Map<T1, T2>(source);
     }
+
+    public T1 Map<T1>(object source)
+    {
+        return Mapper.Map<T1>(source);
+    }
 }
