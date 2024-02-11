@@ -26,22 +26,22 @@ public class Profile : IProfile
 
     private string MethodName => GenerateMethodName(_sourceType, _destinationType);
 
-    private static string GenerateMethodName(Type t1, Type t2) => $"__{t1.Namespace}_{t1.Name}_to_{t2.Namespace}_{t2.Name}".Replace(".", "_");
+    private static string GenerateMethodName(Type source, Type destination) => $"__{source.Namespace}_{source.Name}_to_{destination.Namespace}_{destination.Name}".Replace(".", "_");
 
-    public void Map<T1, T2>()
+    public void Map<TSource, TDestination>()
     {
-        _sourceType = typeof(T1);
-        _destinationType = typeof(T2);
+        _sourceType = typeof(TSource);
+        _destinationType = typeof(TDestination);
 
-        CreateMappings(typeof(T1), typeof(T2));
+        CreateMappings(typeof(TSource), typeof(TDestination));
     }
 
-    private void CreateMappings(Type src, Type dest)
+    private void CreateMappings(Type source, Type destination)
     {
-        var sourceProperties = src.GetProperties();
-        var destinationProperties = dest.GetProperties();
+        var sourceProperties = source.GetProperties();
+        var destinationProperties = destination.GetProperties();
 
-        var methodName = GenerateMethodName(src, dest);
+        var methodName = GenerateMethodName(source, destination);
 
         foreach (var sourceProperty in sourceProperties)
         {
@@ -72,8 +72,8 @@ public class Profile : IProfile
                     _mappings.Add(methodName, new TypeCodeMapping
                     {
                         MethodName = methodName,
-                        SourceType = src,
-                        TargetType = dest
+                        SourceType = source,
+                        TargetType = destination
                     });
                 }
 

@@ -100,7 +100,7 @@ namespace TestApp
             //var destination = mappe.Map<TestObject, TestObjectDto>(source);
             //var destination = AutoMapper.Mapper.Map<TestObject, TestObjectDto>(source);
             //var destination = TinyMapper.Map<TestObjectDto>(source);
-            var destination = mapper.Map<TestObject, TestObjectDto>(source);
+            var destination = mapper.Map<TestObjectDto>(source);
             sw.Stop();
 
             //Console.WriteLine($"Source = {JsonConvert.SerializeObject(source, Formatting.Indented)}");
