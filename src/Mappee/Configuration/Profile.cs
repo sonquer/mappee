@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
@@ -22,18 +23,76 @@ public class Profile : IProfile
 
     private const string Namespace = "Mappee";
 
-    private const string ClassName = "__Mappe_Quick_Mapping";
+    private const string ClassName = "__Mappee_Quick_Mapping";
 
     private string MethodName => GenerateMethodName(_sourceType, _destinationType);
 
     private static string GenerateMethodName(Type source, Type destination) => $"__{source.Namespace}_{source.Name}_to_{destination.Namespace}_{destination.Name}".Replace(".", "_");
 
-    public void Map<TSource, TDestination>()
+    public Profile Bind<TSource, TDestination>()
     {
         _sourceType = typeof(TSource);
         _destinationType = typeof(TDestination);
 
         CreateMappings(typeof(TSource), typeof(TDestination));
+
+        return this;
+    }
+
+    public Profile ForMember<TSource, TDestination>(Expression<Func<TSource, object>> source, Expression<Func<TDestination, object>> destination)
+    {
+        var methodName = GenerateMethodName(typeof(TSource), typeof(TDestination));
+        var sourceMember = GetMemberInfo(source);
+        var destinationMember = GetMemberInfo(destination);
+
+        var mapping = $"classInstance.{destinationMember.Name} = {sourceMember.Name};";
+        if (_mappings.ContainsKey(methodName) == false)
+        {
+            _mappings.Add(methodName, new TypeCodeMapping
+            {
+                MethodName = methodName,
+                SourceType = typeof(TSource),
+                TargetType = typeof(TDestination)
+            });
+        }
+
+        _mappings[methodName].Mappings.Add(mapping);
+
+        return this;
+    }
+
+    public Profile ForMember<TSource, TDestination>(string source, Expression<Func<TDestination, object>> destination)
+    {
+        var methodName = GenerateMethodName(typeof(TSource), typeof(TDestination));
+        var destinationMember = GetMemberInfo(destination);
+
+        var mapping = $"classInstance.{destinationMember.Name} = \"{source}\";";
+        if (_mappings.ContainsKey(methodName) == false)
+        {
+            _mappings.Add(methodName, new TypeCodeMapping
+            {
+                MethodName = methodName,
+                SourceType = typeof(TSource),
+                TargetType = typeof(TDestination)
+            });
+        }
+
+        _mappings[methodName].Mappings.Add(mapping);
+
+        return this;
+    }
+
+    private static MemberInfo GetMemberInfo(Expression expression)
+    {
+        if (expression is LambdaExpression lambdaExpression)
+        {
+            if (lambdaExpression.Body is MemberExpression memberExpression)
+            {
+                return memberExpression.Member;
+            }
+        }
+
+        throw new ArgumentException("Invalid expression");
     }
 
     private void CreateMappings(Type source, Type destination)
@@ -41,45 +100,50 @@ public class Profile : IProfile
         var sourceProperties = source.GetProperties();
         var destinationProperties = destination.GetProperties();
 
-        var methodName = GenerateMethodName(source, destination);
-
         foreach (var sourceProperty in sourceProperties)
         {
             var destinationProperty = destinationProperties.FirstOrDefault(p => p.Name == sourceProperty.Name);
             if (destinationProperty != null)
             {
-                string mapping;
-                if ((sourceProperty.PropertyType.IsClass || sourceProperty.PropertyType.IsAbstract || sourceProperty.PropertyType.IsInterface) && sourceProperty.PropertyType != typeof(string))
-                {
-                    if (sourceProperty.PropertyType.GetInterface(nameof(IEnumerable)) != null || sourceProperty.PropertyType.GetInterface(nameof(ICollection)) != null)
-                    {
-                        var genericSourceType = sourceProperty.PropertyType.GetGenericArguments()[0];
-                        var genericDestinationType = destinationProperty.PropertyType.GetGenericArguments()[0];
-                        mapping = $"classInstance.{destinationProperty.Name} = new List<{genericDestinationType.Namespace}.{genericDestinationType.Name}>();\r\n((List<{genericSourceType.Namespace}.{genericSourceType.Name}>)source.{sourceProperty.Name})?.ForEach(x => classInstance.{destinationProperty.Name}.Add(__Mappe_Quick_Mapping.{GenerateMethodName(genericSourceType, genericDestinationType)}(x)));";
-                    }
-                    else
-                    {
-                        mapping = $"classInstance.{destinationProperty.Name} = source.{sourceProperty.Name} != null ? {MethodName}(source.{sourceProperty.Name}) : null;";
-                    }
-                }
-                else
-                {
-                    mapping = $"classInstance.{destinationProperty.Name} = source.{sourceProperty.Name};";
-                }
-
-                if (_mappings.ContainsKey(methodName) == false)
-                {
-                    _mappings.Add(methodName, new TypeCodeMapping
-                    {
-                        MethodName = methodName,
-                        SourceType = source,
-                        TargetType = destination
-                    });
-                }
-
-                _mappings[methodName].Mappings.Add(mapping);
+                CreateMappingForField(source, destination, sourceProperty, destinationProperty);
             }
         }
+    }
+
+    private void CreateMappingForField(Type source, Type destination, PropertyInfo sourceProperty, PropertyInfo destinationProperty)
+    {
+        var methodName = GenerateMethodName(source, destination);
+
+        string mapping;
+        if ((sourceProperty.PropertyType.IsClass || sourceProperty.PropertyType.IsAbstract || sourceProperty.PropertyType.IsInterface) && sourceProperty.PropertyType != typeof(string))
+        {
+            if (sourceProperty.PropertyType.GetInterface(nameof(IEnumerable)) != null || sourceProperty.PropertyType.GetInterface(nameof(ICollection)) != null)
+            {
+                var genericSourceType = sourceProperty.PropertyType.GetGenericArguments()[0];
+                var genericDestinationType = destinationProperty.PropertyType.GetGenericArguments()[0];
+                mapping = $"classInstance.{destinationProperty.Name} = new List<{genericDestinationType.Namespace}.{genericDestinationType.Name}>();\r\n((List<{genericSourceType.Namespace}.{genericSourceType.Name}>)source.{sourceProperty.Name})?.ForEach(x => classInstance.{destinationProperty.Name}.Add(__Mappee_Quick_Mapping.{GenerateMethodName(genericSourceType, genericDestinationType)}(x)));";
+            }
+            else
+            {
+                mapping = $"classInstance.{destinationProperty.Name} = source.{sourceProperty.Name} != null ? {MethodName}(source.{sourceProperty.Name}) : null;";
+            }
+        }
+        else
+        {
+            mapping = $"classInstance.{destinationProperty.Name} = source.{sourceProperty.Name};";
+        }
+
+        if (_mappings.ContainsKey(methodName) == false)
+        {
+            _mappings.Add(methodName, new TypeCodeMapping
+            {
+                MethodName = methodName,
+                SourceType = source,
+                TargetType = destination
+            });
+        }
+
+        _mappings[methodName].Mappings.Add(mapping);
     }
 
     private string GenerateCode(bool aggressiveOptimization)
