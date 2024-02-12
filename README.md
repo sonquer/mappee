@@ -44,7 +44,7 @@ var testObjectDto = Mapper.Map<TestObjectDto>(testObject);
 var servicesCollection = new ServiceCollection();
 servicesCollection.AddMappee(profile =>
 {
-    profile.Map<TestObject, TestObjectDto>();
+    profile.Bind<TestObject, TestObjectDto>();
     //invoke compile method is not necessary, it will be called automatically
 });
 

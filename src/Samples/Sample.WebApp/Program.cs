@@ -12,7 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMappee(cfg =>
 {
-    cfg.Map<WeatherForecast, WeatherForecastDto>();
+    cfg.Bind<WeatherForecast, WeatherForecastDto>();
 });
 
 var app = builder.Build();

@@ -5,16 +5,10 @@ namespace Mappee;
 
 public static class Mapper
 {
-    public static Profile Bind<TSource, TDestination>(this Profile profile)
-    {
-        profile.Map<TSource, TDestination>();
-        return profile;
-    }
-
     public static Profile Bind<TSource, TDestination>()
     {
         var profile = new Profile();
-        profile.Map<TSource, TDestination>();
+        profile.Bind<TSource, TDestination>();
         return profile;
     }
 

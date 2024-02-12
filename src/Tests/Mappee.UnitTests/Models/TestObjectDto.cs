@@ -17,4 +17,5 @@ public sealed class TestObjectDto
     public string Nickname { get; set; }
     public short Short { get; set; }
     public List<TestObjectFieldDto> Fields { get; set; } = new();
+    public string ConstValue { get; set; }
 }
