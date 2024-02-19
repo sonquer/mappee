@@ -19,7 +19,8 @@ namespace Benchmark
     {
         private TestObject _source;
 
-        [Params(2500)]
+        //[Params(2500)]
+        [Params(5, 10, 20)]
         public int Items;
 
         [GlobalSetup]
