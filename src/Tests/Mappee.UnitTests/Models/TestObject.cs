@@ -1,4 +1,6 @@
-﻿namespace Mappee.UnitTests.Models;
+﻿using Mappee.Configuration.Attributes;
+
+namespace Mappee.UnitTests.Models;
 
 public sealed class TestObject
 {
@@ -16,5 +18,11 @@ public sealed class TestObject
     public long Long { get; set; }
     public string Nickname { get; set; }
     public short Short { get; set; }
+    
+    public bool MemberToIgnore { get; set; }
+
+    [IgnoreMember]
+    public bool MemberToIgnoreByAttribute { get; set; }
+
     public ICollection<TestObjectField> Fields { get; set; } = new List<TestObjectField>();
 }

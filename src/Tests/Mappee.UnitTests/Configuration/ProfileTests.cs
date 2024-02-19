@@ -29,7 +29,7 @@ namespace Mappee.UnitTests.Configuration
 
             var sourceCode = profile.Compile(compilationResult: true);
 
-            Assert.Contains("Mappee.UnitTests.Models.TestObjectDto __Mappee_UnitTests_Models_TestObject_to_Mappee_UnitTests_Models_TestObjectDto(Mappee.UnitTests.Models.TestObject source)", sourceCode.GeneratedCode);
+            Assert.Contains("Mappee.UnitTests.Models.TestObjectDto __Mappee_UnitTests_Models_TestObject_Mappee_UnitTests_Models_TestObjectDto(Mappee.UnitTests.Models.TestObject source)", sourceCode.GeneratedCode);
             Assert.Contains(@"var classInstance = new Mappee.UnitTests.Models.TestObjectDto();", sourceCode.GeneratedCode);
             Assert.Contains("classInstance.Id = source.Id;", sourceCode.GeneratedCode);
             Assert.Contains("classInstance.Bool = source.Bool;", sourceCode.GeneratedCode);
@@ -46,8 +46,36 @@ namespace Mappee.UnitTests.Configuration
             Assert.Contains("classInstance.Nickname = source.Nickname;", sourceCode.GeneratedCode);
             Assert.Contains("classInstance.Short = source.Short;", sourceCode.GeneratedCode);
             Assert.Contains("classInstance.Fields = new List<Mappee.UnitTests.Models.TestObjectFieldDto>();", sourceCode.GeneratedCode);
-            Assert.Contains("((List<Mappee.UnitTests.Models.TestObjectField>)source.Fields)?.ForEach(x => classInstance.Fields.Add(__Mappee_Quick_Mapping.__Mappee_UnitTests_Models_TestObjectField_to_Mappee_UnitTests_Models_TestObjectFieldDto(x)));", sourceCode.GeneratedCode);
+            Assert.Contains("((List<Mappee.UnitTests.Models.TestObjectField>)source.Fields)?.ForEach(x => classInstance.Fields.Add(__Mappee_Profile_Mapping.__Mappee_UnitTests_Models_TestObjectField_Mappee_UnitTests_Models_TestObjectFieldDto(x)));", sourceCode.GeneratedCode);
             Assert.Contains("return classInstance;", sourceCode.GeneratedCode);
+        }
+
+        [Fact]
+        public void Compile_ReturnsGeneratedCodeWithoutIgnoredMembers_WhenSuccessful()
+        {
+            var profile = new Profile();
+            profile.Bind<TestObject, TestObjectDto>()
+                .IgnoreMember<TestObject, TestObjectDto>(source => source.MemberToIgnore);
+
+            profile.Bind<TestObjectField, TestObjectFieldDto>();
+
+            var sourceCode = profile.Compile(compilationResult: true);
+
+            Assert.Contains("// Ignored mapping for 'MemberToIgnore'", sourceCode.GeneratedCode);
+            Assert.DoesNotContain("classInstance.MemberToIgnore = source.MemberToIgnore;", sourceCode.GeneratedCode);
+        }
+
+        [Fact]
+        public void Compile_ReturnsGeneratedCodeWithoutIgnoredMembersByAttributes_WhenSuccessful()
+        {
+            var profile = new Profile();
+            profile.Bind<TestObject, TestObjectDto>();
+            profile.Bind<TestObjectField, TestObjectFieldDto>();
+
+            var sourceCode = profile.Compile(compilationResult: true);
+
+            Assert.Contains("// Ignored mapping for 'MemberToIgnoreByAttribute'", sourceCode.GeneratedCode);
+            Assert.DoesNotContain("classInstance.MemberToIgnoreByAttribute = source.MemberToIgnoreByAttribute;", sourceCode.GeneratedCode);
         }
 
         [Fact]
