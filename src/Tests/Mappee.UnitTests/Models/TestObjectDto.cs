@@ -18,4 +18,6 @@ public sealed class TestObjectDto
     public short Short { get; set; }
     public List<TestObjectFieldDto> Fields { get; set; } = new();
     public string ConstValue { get; set; }
+    public bool MemberToIgnore { get; set; }
+    public bool MemberToIgnoreByAttribute { get; set; }
 }

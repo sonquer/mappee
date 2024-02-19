@@ -28,17 +28,17 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis" Version="4.8.0"/>
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0"/>
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0"/>
+		<PackageReference Include="Microsoft.CodeAnalysis" Version="4.8.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="Images\icon.jpg" Pack="true" PackagePath="\"/>
+		<None Include="Images\icon.jpg" Pack="true" PackagePath="\" />
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="Properties\"/>
+		<Folder Include="Properties\" />
 	</ItemGroup>
 	<ItemGroup>
-		<InternalsVisibleTo Include="Mappee.UnitTests"/>
+		<InternalsVisibleTo Include="Mappee.UnitTests" />
 	</ItemGroup>
 </Project>

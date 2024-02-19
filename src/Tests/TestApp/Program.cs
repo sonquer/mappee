@@ -34,10 +34,13 @@ namespace TestApp
             var servicesCollection = new ServiceCollection();
             servicesCollection.AddMappee(profile =>
             {
-                profile.Bind<TestObject, TestObjectDto>();
+                profile.Bind<TestObject, TestObjectDto>()
+                    .IgnoreMember<TestObject, TestObjectDto>(source => source.Id);
+
                 profile.Bind<TestObjectModification, TestObjectModificationDto>();
                 profile.Bind<TestObjectField, TestObjectFieldDto>();
                 profile.Bind<TestObjectLink, TestObjectLinkDto>();
+                var code = profile.Compile(compilationResult: true);
             });
 
             //[...]

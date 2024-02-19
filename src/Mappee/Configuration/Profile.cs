@@ -1,4 +1,5 @@
-﻿using Mappee.Configuration.Models;
+﻿using Mappee.Configuration.Attributes;
+using Mappee.Configuration.Models;
 using Mappee.Store;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,22 +14,35 @@ using System.Text;
 
 namespace Mappee.Configuration;
 
+/// <summary>
+/// Mapping profile, used to configure mappings between source and destination types.
+/// </summary>
 public class Profile : IProfile
 {
     private Type _sourceType = typeof(object);
 
     private Type _destinationType = typeof(object);
 
-    private readonly Dictionary<string, TypeCodeMapping> _mappings = new();
+    private readonly Dictionary<string, TypeMapping> _mappings = new();
 
-    private const string Namespace = "Mappee";
+    private const string Namespace = nameof(Mappee);
 
-    private const string ClassName = "__Mappee_Quick_Mapping";
+    private const string ClassName = $"__{nameof(Mappee)}_{nameof(Profile)}_Mapping";
 
-    private string MethodName => GenerateMethodName(_sourceType, _destinationType);
+    /// <summary>
+    /// Generates the method name for mapping between the source and destination types.
+    /// </summary>
+    /// <param name="source">The source type.</param>
+    /// <param name="destination">The destination type.</param>
+    /// <returns>The generated method name.</returns>
+    private static string GenerateMethodName(Type source, Type destination) => $"__{source.Namespace}_{source.Name}_{destination.Namespace}_{destination.Name}".Replace(".", "_");
 
-    private static string GenerateMethodName(Type source, Type destination) => $"__{source.Namespace}_{source.Name}_to_{destination.Namespace}_{destination.Name}".Replace(".", "_");
-
+    /// <summary>
+    /// Binds the source and destination types.
+    /// </summary>
+    /// <typeparam name="TSource">The source type.</typeparam>
+    /// <typeparam name="TDestination">The destination type.</typeparam>
+    /// <returns>The profile methodExecution.</returns>
     public Profile Bind<TSource, TDestination>()
     {
         _sourceType = typeof(TSource);
@@ -39,49 +53,66 @@ public class Profile : IProfile
         return this;
     }
 
+    /// <summary>
+    /// Ignores a member during mapping.
+    /// </summary>
+    /// <typeparam name="TSource">The source type.</typeparam>
+    /// <typeparam name="TDestination">The destination type.</typeparam>
+    /// <param name="source">The source member expression.</param>
+    /// <returns>The profile methodExecution.</returns>
+    public Profile IgnoreMember<TSource, TDestination>(Expression<Func<TSource, object>> source)
+    {
+        var methodName = GenerateMethodName(typeof(TSource), typeof(TDestination));
+        var sourceMember = GetMemberInfo(source);
+
+        AddMapping(typeof(TSource), typeof(TDestination), methodName, MappingType.IgnoreMapping, sourceMember.Name);
+
+        return this;
+    }
+
+    /// <summary>
+    /// Specifies a mapping for a member from the source type to the destination type.
+    /// </summary>
+    /// <typeparam name="TSource">The source type.</typeparam>
+    /// <typeparam name="TDestination">The destination type.</typeparam>
+    /// <param name="source">The source member expression.</param>
+    /// <param name="destination">The destination member expression.</param>
+    /// <returns>The profile methodExecution.</returns>
     public Profile ForMember<TSource, TDestination>(Expression<Func<TSource, object>> source, Expression<Func<TDestination, object>> destination)
     {
         var methodName = GenerateMethodName(typeof(TSource), typeof(TDestination));
         var sourceMember = GetMemberInfo(source);
         var destinationMember = GetMemberInfo(destination);
 
-        var mapping = $"classInstance.{destinationMember.Name} = {sourceMember.Name};";
-        if (_mappings.ContainsKey(methodName) == false)
-        {
-            _mappings.Add(methodName, new TypeCodeMapping
-            {
-                MethodName = methodName,
-                SourceType = typeof(TSource),
-                TargetType = typeof(TDestination)
-            });
-        }
-
-        _mappings[methodName].Mappings.Add(mapping);
+        AddMapping(typeof(TSource), typeof(TDestination), methodName, MappingType.PropertyToProperty, sourceMember.Name, destinationMember.Name);
 
         return this;
     }
 
+    /// <summary>
+    /// Member mapping, can be used to map specific member to constant value.
+    /// </summary>
+    /// <typeparam name="TSource"></typeparam>
+    /// <typeparam name="TDestination"></typeparam>
+    /// <param name="source"></param>
+    /// <param name="destination"></param>
+    /// <returns>The profile methodExecution.</returns>
     public Profile ForMember<TSource, TDestination>(string source, Expression<Func<TDestination, object>> destination)
     {
         var methodName = GenerateMethodName(typeof(TSource), typeof(TDestination));
         var destinationMember = GetMemberInfo(destination);
 
-        var mapping = $"classInstance.{destinationMember.Name} = \"{source}\";";
-        if (_mappings.ContainsKey(methodName) == false)
-        {
-            _mappings.Add(methodName, new TypeCodeMapping
-            {
-                MethodName = methodName,
-                SourceType = typeof(TSource),
-                TargetType = typeof(TDestination)
-            });
-        }
-
-        _mappings[methodName].Mappings.Add(mapping);
+        AddMapping(typeof(TSource), typeof(TDestination), methodName, MappingType.PropertyToConst, sourceAsString: source, destinationMemberName: destinationMember.Name);
 
         return this;
     }
 
+    /// <summary>
+    /// Gets the member information from the expression.
+    /// </summary>
+    /// <param name="expression"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     private static MemberInfo GetMemberInfo(Expression expression)
     {
         if (expression is LambdaExpression lambdaExpression)
@@ -90,11 +121,24 @@ public class Profile : IProfile
             {
                 return memberExpression.Member;
             }
+
+            if (lambdaExpression.Body is UnaryExpression unaryExpression)
+            {
+                if (unaryExpression.Operand is MemberExpression operand)
+                {
+                    return operand.Member;
+                }
+            }
         }
 
         throw new ArgumentException("Invalid expression");
     }
 
+    /// <summary>
+    /// Creates mappings between the source and destination types.
+    /// </summary>
+    /// <param name="source">The source type.</param>
+    /// <param name="destination">The destination type.</param>
     private void CreateMappings(Type source, Type destination)
     {
         var sourceProperties = source.GetProperties();
@@ -110,9 +154,22 @@ public class Profile : IProfile
         }
     }
 
+    /// <summary>
+    /// Creates a mapping for a field between the source and destination types.
+    /// </summary>
+    /// <param name="source">The source type.</param>
+    /// <param name="destination">The destination type.</param>
+    /// <param name="sourceProperty">The source property.</param>
+    /// <param name="destinationProperty">The destination property.</param>
     private void CreateMappingForField(Type source, Type destination, PropertyInfo sourceProperty, PropertyInfo destinationProperty)
     {
         var methodName = GenerateMethodName(source, destination);
+
+        if (sourceProperty.GetCustomAttributes(typeof(IgnoreMemberAttribute), true).Any())
+        {
+            AddMapping(source, destination, methodName, MappingType.IgnoreMapping, sourceProperty.Name);
+            return;
+        }
 
         string mapping;
         if ((sourceProperty.PropertyType.IsClass || sourceProperty.PropertyType.IsAbstract || sourceProperty.PropertyType.IsInterface) && sourceProperty.PropertyType != typeof(string))
@@ -121,11 +178,11 @@ public class Profile : IProfile
             {
                 var genericSourceType = sourceProperty.PropertyType.GetGenericArguments()[0];
                 var genericDestinationType = destinationProperty.PropertyType.GetGenericArguments()[0];
-                mapping = $"classInstance.{destinationProperty.Name} = new List<{genericDestinationType.Namespace}.{genericDestinationType.Name}>();\r\n((List<{genericSourceType.Namespace}.{genericSourceType.Name}>)source.{sourceProperty.Name})?.ForEach(x => classInstance.{destinationProperty.Name}.Add(__Mappee_Quick_Mapping.{GenerateMethodName(genericSourceType, genericDestinationType)}(x)));";
+                mapping = $"classInstance.{destinationProperty.Name} = new List<{genericDestinationType.Namespace}.{genericDestinationType.Name}>();\r\n((List<{genericSourceType.Namespace}.{genericSourceType.Name}>)source.{sourceProperty.Name})?.ForEach(x => classInstance.{destinationProperty.Name}.Add({ClassName}.{GenerateMethodName(genericSourceType, genericDestinationType)}(x)));";
             }
             else
             {
-                mapping = $"classInstance.{destinationProperty.Name} = source.{sourceProperty.Name} != null ? {MethodName}(source.{sourceProperty.Name}) : null;";
+                mapping = $"classInstance.{destinationProperty.Name} = source.{sourceProperty.Name} != null ? {methodName}(source.{sourceProperty.Name}) : null;";
             }
         }
         else
@@ -133,9 +190,25 @@ public class Profile : IProfile
             mapping = $"classInstance.{destinationProperty.Name} = source.{sourceProperty.Name};";
         }
 
+        AddMapping(source, destination, methodName, MappingType.Plain, sourceProperty.Name, destinationProperty.Name, code: mapping);
+    }
+
+    /// <summary>
+    /// Adds a mapping between the source and destination types.
+    /// </summary>
+    /// <param name="source">The source type.</param>
+    /// <param name="destination">The destination type.</param>
+    /// <param name="methodName">The method name.</param>
+    /// <param name="type">The mapping type.</param>
+    /// <param name="sourceMemberName">The source member name.</param>
+    /// <param name="destinationMemberName">The destination member name.</param>
+    /// <param name="sourceAsString">The source as string.</param>
+    /// <param name="code">The mapping code.</param>
+    private void AddMapping(Type source, Type destination, string methodName, MappingType type, string sourceMemberName = null, string destinationMemberName = null, string sourceAsString = null, string code = null)
+    {
         if (_mappings.ContainsKey(methodName) == false)
         {
-            _mappings.Add(methodName, new TypeCodeMapping
+            _mappings.Add(methodName, new TypeMapping
             {
                 MethodName = methodName,
                 SourceType = source,
@@ -143,9 +216,21 @@ public class Profile : IProfile
             });
         }
 
-        _mappings[methodName].Mappings.Add(mapping);
+        _mappings[methodName].Mappings.Add(new TypeMappingEntry
+        {
+            SourceMember = sourceMemberName,
+            DestinationMember = destinationMemberName,
+            SourceAsString = sourceAsString,
+            Code = code,
+            Type = type
+        });
     }
 
+    /// <summary>
+    /// Generates the code for the profile.
+    /// </summary>
+    /// <param name="aggressiveOptimization">Specifies whether aggressive optimization should be applied.</param>
+    /// <returns>The generated code.</returns>
     private string GenerateCode(bool aggressiveOptimization)
     {
         var sb = new StringBuilder();
@@ -170,7 +255,25 @@ public class Profile : IProfile
             sb.AppendLine($"            var classInstance = new {mapping.Value.TargetType.Namespace}.{mapping.Value.TargetType.Name}();");
             foreach (var map in mapping.Value.Mappings)
             {
-                sb.AppendLine($"            {map}");
+                if (mapping.Value.Mappings.Any(e => e.SourceMember == map.SourceMember && e.Type == MappingType.IgnoreMapping) == false)
+                {
+                    if (map.Type == MappingType.Plain)
+                    {
+                        sb.AppendLine($"            {map.Code}");
+                    }
+                    else if (map.Type == MappingType.PropertyToProperty)
+                    {
+                        sb.AppendLine($"            classInstance.{map.DestinationMember} = source.{map.SourceMember};");
+                    }
+                    else if (map.Type == MappingType.PropertyToConst)
+                    {
+                        sb.AppendLine($"            classInstance.{map.DestinationMember} = \"{map.SourceAsString}\";");
+                    }
+                }
+                else
+                {
+                    sb.AppendLine($"            // Ignored mapping for '{map.SourceMember}'");
+                }
             }
             sb.AppendLine("            return classInstance;");
             sb.AppendLine("        }");
@@ -183,12 +286,21 @@ public class Profile : IProfile
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Compiles the profile and returns the compilation result.
+    /// </summary>
+    /// <param name="optimizationLevel">The optimization level.</param>
+    /// <param name="concurrentBuild">Specifies whether concurrent build should be enabled.</param>
+    /// <param name="aggressiveOptimization">Specifies whether aggressive optimization should be applied.</param>
+    /// <param name="compilationResult">Specifies whether the compilation result should be returned.</param>
+    /// <returns>The compilation result.</returns>
+    /// <exception cref="Exception"></exception>
     public CompilationResult Compile(OptimizationLevel optimizationLevel = OptimizationLevel.Release, bool concurrentBuild = true, bool aggressiveOptimization = true, bool compilationResult = false)
     {
         var code = GenerateCode(aggressiveOptimization);
 
         var syntaxTree = CSharpSyntaxTree.ParseText(code);
-        var assemblyName = $"__{_sourceType.Namespace}_{_sourceType.Name}_to_{_destinationType.Namespace}_{_destinationType.Name}";
+        var assemblyName = $"__{_sourceType.Namespace}_{_sourceType.Name}_{_destinationType.Namespace}_{_destinationType.Name}";
         var compilation = CSharpCompilation.Create(assemblyName)
             .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: optimizationLevel, concurrentBuild: concurrentBuild))
             .AddReferences(GetReferences())
@@ -217,7 +329,7 @@ public class Profile : IProfile
 
         foreach (var mapping in _mappings)
         {
-            InstanceStore.Store(mapping.Value.SourceType, mapping.Value.TargetType, instance, mapping.Value.MethodName);
+            InstanceMappingStore.Append(mapping.Value.SourceType, mapping.Value.TargetType, instance, mapping.Value.MethodName);
         }
 
         if (compilationResult)
@@ -233,7 +345,11 @@ public class Profile : IProfile
         return null;
     }
 
-    public static MetadataReference[] GetReferences() => new MetadataReference[] {
+    /// <summary>
+    /// Gets the metadata references for the compilation.
+    /// </summary>
+    /// <returns>The metadata references.</returns>
+    private static MetadataReference[] GetReferences() => new MetadataReference[] {
         MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
         MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
         MetadataReference.CreateFromFile(typeof(Activator).Assembly.Location),
