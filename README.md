@@ -20,6 +20,14 @@ Generated code is cached, so it is only generated once for each type pair, and t
 ```csharp
 Mapper.Bind<TestObject, TestObjectDto>()
     .IgnoreMember<TestObject, TestObjectDto>(e => e.Name);
+    .BeforeMap<TestObject, TestObjectDto>((source, _) =>
+    {
+        source.Nickname = $"{source.FirstName}{source.LastName}".ToLower();
+    })
+    .AfterMap<TestObject, TestObjectDto>((_, destination) =>
+    {
+        destination.Char = destination.FirstName.First();
+    })
     .Bind<TestObjectModification, TestObjectModificationDto>()
     .Bind<TestObjectField, TestObjectFieldDto>()
     .Bind<TestObjectLink, TestObjectLinkDto>()
@@ -36,7 +44,15 @@ var servicesCollection = new ServiceCollection();
 servicesCollection.AddMappee(profile =>
 {
     profile.Bind<TestObject, TestObjectDto>()
-      .IgnoreMember<TestObject, TestObjectDto>(e => e.Name);
+        .IgnoreMember<TestObject, TestObjectDto>(e => e.Name)
+        .BeforeMap<TestObject, TestObjectDto>((source, _) =>
+        {
+            source.Nickname = $"{source.FirstName}{source.LastName}".ToLower();
+        })
+        .AfterMap<TestObject, TestObjectDto>((_, destination) =>
+        {
+            destination.Char = destination.FirstName.First();
+        });
 
     //invoke compile method is not necessary, it will be called automatically
 });

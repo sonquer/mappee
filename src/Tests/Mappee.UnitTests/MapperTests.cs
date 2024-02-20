@@ -12,11 +12,11 @@ namespace Mappee.UnitTests
                 .ForMember<TestObject, TestObjectDto>("TEST_VALUE", destination => destination.ConstValue)
                 .AfterMap<TestObject, TestObjectDto>((_, destination) =>
                 {
-                    destination.Nickname = $"{destination.FirstName}{destination.LastName}".ToLower();
+                    destination.Char = destination.FirstName.First();
                 })
                 .BeforeMap<TestObject, TestObjectDto>((source, _) =>
                 {
-                    source.Nickname = $"{source.FirstName}{source.LastName}{source.Id}".ToLower();
+                    source.Nickname = $"{source.FirstName}{source.LastName}".ToLower();
                 })
                 .Compile();
         }
@@ -114,7 +114,7 @@ namespace Mappee.UnitTests
             var result = Mapper.Map<TestObjectDto>(source);
 
             Assert.Equal(source.FirstName, result.FirstName);
-            Assert.Equal($"{source.FirstName}{source.LastName}".ToLower(), result.Nickname);
+            Assert.Equal('J', result.Char);
             Assert.NotSame(source, result);
         }
     }
