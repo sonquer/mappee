@@ -1,8 +1,10 @@
 ﻿Mappee - Fastest avaiable mapper for .NET
 ======================================================
-[![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/sonquer/mappee/blob/main/LICENSE)
-[![First Timers](https://img.shields.io/badge/first--timers--only-friendly-blue.svg)](http://www.firsttimersonly.com/)
-[![Nuget](https://img.shields.io/nuget/v/mappee.svg)](https://www.nuget.org/packages/Mappee/)
+[![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg?colorA=192330&colorB=c70039&style=for-the-badge)](https://github.com/sonquer/mappee/blob/main/LICENSE)
+[![First Timers](https://img.shields.io/badge/first--timers--only-friendly-blue.svg?colorA=192330&style=for-the-badge)](http://www.firsttimersonly.com/)
+[![CodeFactor](https://img.shields.io/codefactor/grade/github/sonquer/mappee?colorA=192330&style=for-the-badge)](https://www.codefactor.io/repository/github/sonquer/mappee)
+[![Nuget](https://img.shields.io/nuget/v/mappee.svg?colorA=192330&style=for-the-badge)](https://www.nuget.org/packages/Mappee/)
+
 
 Mappee is a high performance object-to-object mapper for .NET. It is a simple and easy to use library that can be used to map objects of different types. It is designed to be fast and efficient, and it is the fastest available mapper for .NET.
 The main idea is to map objects using precompiled code, which makes it much faster than other mappers that use reflection.
@@ -17,6 +19,7 @@ Generated code is cached, so it is only generated once for each type pair, and t
 ### Using static methods
 ```csharp
 Mapper.Bind<TestObject, TestObjectDto>()
+    .IgnoreMember<TestObject, TestObjectDto>(e => e.Name);
     .Bind<TestObjectModification, TestObjectModificationDto>()
     .Bind<TestObjectField, TestObjectFieldDto>()
     .Bind<TestObjectLink, TestObjectLinkDto>()
@@ -32,7 +35,9 @@ var testObjectDto = Mapper.Map<TestObjectDto>(testObject);
 var servicesCollection = new ServiceCollection();
 servicesCollection.AddMappee(profile =>
 {
-    profile.Bind<TestObject, TestObjectDto>();
+    profile.Bind<TestObject, TestObjectDto>()
+      .IgnoreMember<TestObject, TestObjectDto>(e => e.Name);
+
     //invoke compile method is not necessary, it will be called automatically
 });
 
