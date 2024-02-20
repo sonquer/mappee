@@ -25,9 +25,28 @@ public class Profile : IProfile
 
     private readonly Dictionary<string, TypeMapping> _mappings = new();
 
-    private const string Namespace = nameof(Mappee);
+    private const string Namespace = $"{nameof(Mappee)}GeneratedCode";
 
     private const string ClassName = $"__{nameof(Mappee)}_{nameof(Profile)}_Mapping";
+
+    private static Dictionary<string, List<Delegate>> Actions { get; } = new();
+
+    /// <summary>
+    /// Executes the actions associated with the specified key.
+    /// </summary>
+    /// <typeparam name="TSource">The type of the source object.</typeparam>
+    /// <typeparam name="TDestination">The type of the destination object.</typeparam>
+    /// <param name="key">The key associated with the actions.</param>
+    /// <param name="source">The source object.</param>
+    /// <param name="destination">The destination object.</param>
+    public static void ExecuteActions<TSource, TDestination>(string key, TSource source, TDestination destination)
+    {
+        if (Actions.ContainsKey(key) == false) return;
+        foreach (var action in Actions[key].OfType<Action<TSource, TDestination>>())
+        {
+            action(source, destination);
+        }
+    }
 
     /// <summary>
     /// Generates the method name for mapping between the source and destination types.
@@ -52,6 +71,42 @@ public class Profile : IProfile
 
         return this;
     }
+
+    /// <summary>
+    /// Adds a function to be executed before the mapping of objects of type <typeparamref name="TSource"/> to <typeparamref name="TDestination"/>.
+    /// </summary>
+    /// <typeparam name="TSource">The source type.</typeparam>
+    /// <typeparam name="TDestination">The destination type.</typeparam>
+    /// <param name="function">The function to be executed.</param>
+    /// <returns>The updated profile.</returns>
+    public Profile BeforeMap<TSource, TDestination>(Action<TSource, TDestination> function)
+    {
+        return AddAction(nameof(BeforeMap), function);
+    }
+
+    /// <summary>
+    /// Adds a function to be executed after the mapping of objects of type <typeparamref name="TSource"/> to <typeparamref name="TDestination"/>.
+    /// </summary>
+    /// <typeparam name="TSource">The source type.</typeparam>
+    /// <typeparam name="TDestination">The destination type.</typeparam>
+    /// <param name="function">The function to be executed.</param>
+    /// <returns>The updated profile.</returns>
+    public Profile AfterMap<TSource, TDestination>(Action<TSource, TDestination> function)
+    {
+        return AddAction(nameof(AfterMap), function);
+    }
+
+    private Profile AddAction<TSource, TDestination>(string key, Action<TSource, TDestination> function)
+    {
+        if (Actions.ContainsKey(key) == false)
+        {
+            Actions.Add(key, new List<Delegate>());
+        }
+
+        Actions[key].Add(function);
+
+        return this;
+    }   
 
     /// <summary>
     /// Ignores a member during mapping.
@@ -241,8 +296,11 @@ public class Profile : IProfile
         sb.AppendLine("using System.Linq.Expressions;");
         sb.AppendLine($"using {_sourceType.Namespace};");
         sb.AppendLine($"using {Namespace};");
+        sb.AppendLine($"using {nameof(Mappee)};");
+        sb.AppendLine();
         if (aggressiveOptimization) sb.AppendLine("using System.Runtime.CompilerServices;");
         sb.AppendLine($"namespace {Namespace}");
+        sb.AppendLine();
         sb.AppendLine("{");
         sb.AppendLine($"    public class {ClassName}");
         sb.AppendLine("    {");
@@ -253,6 +311,12 @@ public class Profile : IProfile
             sb.AppendLine($"        public static {mapping.Value.TargetType.Namespace}.{mapping.Value.TargetType.Name} {mapping.Value.MethodName}({mapping.Value.SourceType.Namespace}.{mapping.Value.SourceType.Name} source)");
             sb.AppendLine("        {");
             sb.AppendLine($"            var classInstance = new {mapping.Value.TargetType.Namespace}.{mapping.Value.TargetType.Name}();");
+
+            if (Actions.ContainsKey(nameof(BeforeMap)) && Actions[nameof(BeforeMap)].Count > 0)
+            {
+                sb.AppendLine($"            Mappee.Configuration.{nameof(Profile)}.{nameof(ExecuteActions)}(\"{nameof(BeforeMap)}\",source, classInstance);");
+            }
+
             foreach (var map in mapping.Value.Mappings)
             {
                 if (mapping.Value.Mappings.Any(e => e.SourceMember == map.SourceMember && e.Type == MappingType.IgnoreMapping) == false)
@@ -275,6 +339,12 @@ public class Profile : IProfile
                     sb.AppendLine($"            // Ignored mapping for '{map.SourceMember}'");
                 }
             }
+
+            if (Actions.ContainsKey(nameof(AfterMap)) && Actions[nameof(AfterMap)].Count > 0)
+            {
+                sb.AppendLine($"            Mappee.Configuration.{nameof(Profile)}.{nameof(ExecuteActions)}(\"{nameof(AfterMap)}\",source, classInstance);");
+            }
+
             sb.AppendLine("            return classInstance;");
             sb.AppendLine("        }");
             sb.AppendLine();
@@ -355,6 +425,7 @@ public class Profile : IProfile
         MetadataReference.CreateFromFile(typeof(Activator).Assembly.Location),
         MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location),
         MetadataReference.CreateFromFile(typeof(List<>).Assembly.Location),
+        MetadataReference.CreateFromFile(typeof(Profile).Assembly.Location),
         MetadataReference.CreateFromFile(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location) ?? throw new InvalidOperationException(), "mscorlib.dll")),
         MetadataReference.CreateFromFile(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location) ?? throw new InvalidOperationException(), "netstandard.dll")),
         MetadataReference.CreateFromFile(Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location) ?? throw new InvalidOperationException(), "System.dll")),
