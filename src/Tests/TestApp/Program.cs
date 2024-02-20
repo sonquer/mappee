@@ -1,5 +1,4 @@
-﻿using Mappee;
-using Mappee.Abstraction;
+﻿using Mappee.Abstraction;
 using Mappee.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Nelibur.ObjectMapper;
@@ -35,7 +34,11 @@ namespace TestApp
             servicesCollection.AddMappee(profile =>
             {
                 profile.Bind<TestObject, TestObjectDto>()
-                    .IgnoreMember<TestObject, TestObjectDto>(source => source.Id);
+                    .IgnoreMember<TestObject, TestObjectDto>(source => source.Id)
+                    .AfterMap<TestObject, TestObjectDto>((_, dto) =>
+                    {
+                        dto.LastName = $"{dto.LastName} + '{dto.Char}'";
+                    });
 
                 profile.Bind<TestObjectModification, TestObjectModificationDto>();
                 profile.Bind<TestObjectField, TestObjectFieldDto>();
@@ -50,7 +53,7 @@ namespace TestApp
 
             var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
 
-            var n = 2_500;
+            var n = 5;
             var source = new TestObject
             {
                 Id = n,
