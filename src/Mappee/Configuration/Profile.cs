@@ -237,7 +237,8 @@ public class Profile : IProfile
             }
             else
             {
-                mapping = $"classInstance.{destinationProperty.Name} = source.{sourceProperty.Name} != null ? {methodName}(source.{sourceProperty.Name}) : null;";
+                var destinationMethodName = GenerateMethodName(sourceProperty.PropertyType, destinationProperty.PropertyType);
+                mapping = $"classInstance.{destinationProperty.Name} = source.{sourceProperty.Name} != null ? {destinationMethodName}(source.{sourceProperty.Name}) : null;";
             }
         }
         else
