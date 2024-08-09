@@ -233,7 +233,10 @@ public class Profile : IProfile
             {
                 var genericSourceType = sourceProperty.PropertyType.GetGenericArguments()[0];
                 var genericDestinationType = destinationProperty.PropertyType.GetGenericArguments()[0];
-                mapping = $"classInstance.{destinationProperty.Name} = new List<{genericDestinationType.Namespace}.{genericDestinationType.Name}>();\r\n((List<{genericSourceType.Namespace}.{genericSourceType.Name}>)source.{sourceProperty.Name})?.ForEach(x => classInstance.{destinationProperty.Name}.Add({ClassName}.{GenerateMethodName(genericSourceType, genericDestinationType)}(x)));";
+
+                mapping = genericSourceType == genericDestinationType
+                    ? $"classInstance.{destinationProperty.Name} = new List<{genericDestinationType.Namespace}.{genericDestinationType.Name}>();\r\n((List<{genericSourceType.Namespace}.{genericSourceType.Name}>)source.{sourceProperty.Name})?.ForEach(x => classInstance.{destinationProperty.Name}.Add(x));"
+                    : $"classInstance.{destinationProperty.Name} = new List<{genericDestinationType.Namespace}.{genericDestinationType.Name}>();\r\n((List<{genericSourceType.Namespace}.{genericSourceType.Name}>)source.{sourceProperty.Name})?.ForEach(x => classInstance.{destinationProperty.Name}.Add({ClassName}.{GenerateMethodName(genericSourceType, genericDestinationType)}(x)));";
             }
             else
             {
